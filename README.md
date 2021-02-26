@@ -9,7 +9,7 @@ GNN+KG+Datalog+LISP=Junk
 用来访问Neo4J数据库的接口，通过这玩意获取三元组和图结构数据
 
 ## TensorFlow：
-炼丹，用来做图嵌入和GNN前向扩充KG，没啥好说的
+炼丹，用GCN或其它GNN来做实体分类（Entities Classification）和关系预测（Links Prediction），没啥好说的
 
 ## PySWIP：
 用来连接SWI-Prolog实现推理和回溯
