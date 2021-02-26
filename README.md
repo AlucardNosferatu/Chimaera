@@ -9,10 +9,10 @@ GNN+KG+Datalog+LISP=Junk
 用来访问Neo4J数据库的接口，通过这玩意获取三元组和图结构数据
 
 ## TensorFlow：
-炼丹，用来做图嵌入和GNN前向扩充KG，没啥好说的
+炼丹，用GCN或其它GNN来做实体分类（Entities Classification）和关系预测（Links Prediction），没啥好说的
 
 ## Pengines：
-用来连接SWI-Prolog实现推理和回溯
+连接SWI-Prolog，利用基于Prolog实现的推理引擎进行推理和回溯
 
 ## Hy（或者其它LISP方言接口）：
 LISP方言编写工具类，在Hy堆栈上动态更新自身运行逻辑实现元编程（Meta-Programming）
