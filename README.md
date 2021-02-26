@@ -11,7 +11,7 @@ GNN+KG+Datalog+LISP=Junk
 ## TensorFlow：
 炼丹，用来做图嵌入和GNN前向扩充KG，没啥好说的
 
-## PySWIP：
+## Pengines：
 用来连接SWI-Prolog实现推理和回溯
 
 ## Hy（或者其它LISP方言接口）：
