@@ -1,33 +1,49 @@
 from pengines.Builder import PengineBuilder
 from pengines.Pengine import Pengine
-from prologterms import TermGenerator, PrologRenderer, Program, Var, Rule
 
-src_context = 'knows(alice, david).\n'
-src_context += '{}(X,Y) :- {}(Y,X).'.format('knows', 'knows')
 
-P = TermGenerator()
-X = Var('X')
-Y = Var('Y')
-Z = Var('Z')
-R = PrologRenderer()
+def rel_be(dst_rel):
+    if dst_rel.startswith('be_'):
+        dst_rel_be = dst_rel[3:]
+    else:
+        dst_rel_be = 'be_' + dst_rel
+    return dst_rel_be
 
-rule1 = Rule(P.knowsb(X, Y), P.knowsf(Y, X))
-rule2 = Rule(P.knows(X, Y), P.knowsb(Y, X))
-rule3 = Rule(P.knows(X, Y), P.knowsf(Y, X))
-p = Program(
-    rule1,
-    rule2,
-    rule3,
-    P.knowsf('alice', 'david'),
-)
 
-q = P.knows(X, Y)
+def rel_rel(dst_rel_1, dst_rel_2):
+    return dst_rel_1 + '_' + dst_rel_2
 
-factory = PengineBuilder(urlserver="http://localhost:4242",
-                         srctext=R.render(p),
-                         ask=R.render(q))
-pengine = Pengine(builder=factory, debug=False)
-while pengine.currentQuery.hasMore:
-    pengine.doNext(pengine.currentQuery)
-for p in pengine.currentQuery.availProofs:
-    print('{} <- {}'.format(p[X.name], p[Y.name]))
+
+def append_rule(src_context, type, param):
+    if type == 'rel_be':
+        dst_rel = param
+        dst_rel_be = rel_be(dst_rel)
+        src_context.append('{}(X,Y) :- {}(Y,X).'.format(dst_rel_be, dst_rel))
+    elif type == 'rel_rel':
+        dst_rel_1 = param[0]
+        dst_rel_2 = param[1]
+        dst_rel_0 = rel_rel(dst_rel_1, dst_rel_2)
+        src_context.append('{}(X,Z) :- {}(X,Y), {}(Y,Z).'.format(dst_rel_0, dst_rel_1, dst_rel_2))
+    else:
+        src_context.append(param)
+    return src_context
+
+
+def find_all_match(src_context, dst_rel):
+    src_context_str = '\n'.join(src_context)
+    factory = PengineBuilder(urlserver="http://localhost:4242",
+                             srctext=src_context_str,
+                             ask=dst_rel + '(X,Y)'
+                             )
+    pengine = Pengine(builder=factory, debug=False)
+    while pengine.currentQuery.hasMore:
+        pengine.doNext(pengine.currentQuery)
+    for p in pengine.currentQuery.availProofs:
+        print('{} <- {}'.format(p['X'], p['Y']))
+
+
+def rel_in(src_context, dst_rel):
+    for line in src_context:
+        if line.startswith(dst_rel + '('):
+            return True
+    return False

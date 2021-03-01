@@ -63,6 +63,6 @@ if __name__ == "__main__":
     user = "neo4j"
     password = "neo4j"
     app = App(bolt_url, user, password)
-    # app.create_friendship("Alice", "David")
+    app.create_friendship("David", "Scrooge")
     app.find_person("David")
     app.close()
