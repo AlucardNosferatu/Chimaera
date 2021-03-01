@@ -36,10 +36,13 @@ def find_all_match(src_context, dst_rel):
                              ask=dst_rel + '(X,Y)'
                              )
     pengine = Pengine(builder=factory, debug=False)
+    results=[]
     while pengine.currentQuery.hasMore:
         pengine.doNext(pengine.currentQuery)
     for p in pengine.currentQuery.availProofs:
         print('{} <- {}'.format(p['X'], p['Y']))
+        results.append([p['X'], p['Y']])
+    return results
 
 
 def rel_in(src_context, dst_rel):
