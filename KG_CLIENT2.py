@@ -23,6 +23,26 @@ def find_rel(kg, rel, limit=None):
     return results, symbols
 
 
+def merge_rel(kg, src, rel, dst):
+    symbols = ['a', 'b', 'c']
+    init_node = ("MERGE(%s{%s: '%s'}) RETURN %s" % (symbols[0], src['key'], src['val'], symbols[0]))
+    _ = kg.run(init_node).data()
+    init_node = ("MERGE(%s{%s: '%s'}) RETURN %s" % (symbols[2], dst['key'], dst['val'], symbols[2]))
+    _ = kg.run(init_node).data()
+    cypher_query = "MATCH ({0}),({2}) WHERE {0}.{3} = '{4}' AND {2}.{5} = '{6}' MERGE ({0})-[{1}:{7}]->({2}) RETURN {0},{1},{2}".format(
+        symbols[0],
+        symbols[1],
+        symbols[2],
+        src['key'],
+        src['val'],
+        dst['key'],
+        dst['val'],
+        rel
+    )
+    results = kg.run(cypher_query).data()
+    return results, symbols
+
+
 def id2node(kg, id):
     symbols = ['a']
     cypher_query = "MATCH ({}) WHERE id({})={} RETURN {}".format(
