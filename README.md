@@ -27,6 +27,6 @@ LISP方言编写工具类，在Hy堆栈上动态更新自身运行逻辑实现�
 炼丹，用GCN或其它GNN来做实体分类（Entities Classification）和关系预测（Links Prediction），没啥好说的
 
 ## 模块6. Ctypes
-利用调用kernel32.dll，读写进程中指定内存数据
+调用kernel32.dll，使用其开放的API读写进程中指定内存数据
 
 下一步：对指定函数进行代理（Hook），读写入参和返回值
