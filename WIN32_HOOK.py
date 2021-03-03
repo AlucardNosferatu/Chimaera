@@ -1,8 +1,19 @@
 import ctypes as c
+import win32con as wcon
 import time
 from ctypes import wintypes as w
+import win32process as wproc
 
-pid = 16996  # Minesweeper
+
+class MODULEINFO(c.Structure):
+    _fields_ = [
+        ("lpBaseOfDll", c.c_void_p),
+        ("SizeOfImage", w.DWORD),
+        ("EntryPoint", c.c_void_p),
+    ]
+
+
+pid = 268  # Minesweeper
 
 k32 = c.windll.kernel32
 
@@ -22,9 +33,24 @@ CloseHandle = k32.CloseHandle
 CloseHandle.argtypes = [w.HANDLE]
 CloseHandle.restype = w.BOOL
 
-processHandle = OpenProcess(0x10, False, pid)
+get_module_information_func_name = "GetModuleInformation"
+GetModuleInformation = getattr(c.WinDLL("kernel32"), get_module_information_func_name, getattr(c.WinDLL("psapi"), get_module_information_func_name))
+GetModuleInformation.argtypes = [w.HANDLE, w.HMODULE, c.POINTER(MODULEINFO), w.DWORD]
+GetModuleInformation.restype = w.BOOL
 
-addr = 0x000002BD2583D090  # Minesweeper.exe module base address
+processHandle = OpenProcess(wcon.PROCESS_ALL_ACCESS, False, pid)
+module_info = MODULEINFO()
+module_handles = wproc.EnumProcessModules(processHandle)
+for i in range(len(module_handles)):
+    module_handle = module_handles[i]
+    res = GetModuleInformation(processHandle, module_handle, c.byref(module_info), c.sizeof(module_info))
+    module_file_name = wproc.GetModuleFileNameEx(processHandle, module_handle)
+    print("ModuleName: {}".format(module_file_name))
+    print("EntryPoint: {}".format(module_info.EntryPoint))
+    print("SizeOfImage: {}".format(module_info.SizeOfImage))
+    print("lpBaseOfDll: {}".format(module_info.lpBaseOfDll))
+    print()
+addr = 0x00000253F2653CB0  # Minesweeper.exe module base address
 data = c.c_char()
 bytesRead = c.c_ulonglong()
 while True:
