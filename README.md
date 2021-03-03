@@ -24,5 +24,9 @@ LISP方言编写工具类，在Hy堆栈上动态更新自身运行逻辑实现�
 ## 模块5. TensorFlow：
 炼丹，用GCN或其它GNN来做实体分类（Entities Classification）和关系预测（Links Prediction），没啥好说的
 
-## 模块6. MetaHook
-利用操作系统的钩子或网络连接分析器获取数据
+## 模块6. PyWin32
+利用WMI获取进程信息，定位进程中的函数指针
+
+对指定函数进行代理（Hook），获取入参和返回值
+
+可将自身程序运行结果替换入参或返回值
