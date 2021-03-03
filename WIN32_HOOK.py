@@ -1,48 +1,35 @@
-import win32pdh
+import ctypes as c
+import time
+from ctypes import wintypes as w
 
+pid = 16996  # Minesweeper
 
-def get_processes():
-    win32pdh.EnumObjects(None, None, win32pdh.PERF_DETAIL_WIZARD)
-    # instances  是所有的进程名称
-    junk, instances = win32pdh.EnumObjectItems(None, None, 'Process', win32pdh.PERF_DETAIL_WIZARD)
+k32 = c.windll.kernel32
 
-    proc_dict = {}
-    # 建立进程状态字典并更新进程状态
-    for instance in instances:
-        if instance in proc_dict:
-            proc_dict[instance] = proc_dict[instance] + 1
-        else:
-            proc_dict[instance] = 0
+OpenProcess = k32.OpenProcess
+OpenProcess.argtypes = [w.DWORD, w.BOOL, w.DWORD]
+OpenProcess.restype = w.HANDLE
 
-    proc_ids = []
-    for instance, max_instances in proc_dict.items():
-        for inum in range(max_instances + 1):
-            hq = win32pdh.OpenQuery()  # initializes the query handle
-            print(hq)
-            try:
-                # 查找出进程句柄位置
-                path = win32pdh.MakeCounterPath((None, 'Process', instance, None, inum, 'ID Process'))
+ReadProcessMemory = k32.ReadProcessMemory
+ReadProcessMemory.argtypes = [w.HANDLE, w.LPCVOID, w.LPVOID, c.c_size_t, c.POINTER(c.c_size_t)]
+ReadProcessMemory.restype = w.BOOL
 
-                counter_handle = win32pdh.AddCounter(hq, path)  # convert counter path to counter handle
-                info = win32pdh.GetCounterInfo(counter_handle, 3)
-                print(info)
-                try:
-                    win32pdh.CollectQueryData(hq)  # collects data for the counter
-                    # val为进程id
-                    type, val = win32pdh.GetFormattedCounterValue(counter_handle, win32pdh.PDH_FMT_LONG)
-                    print(val)
-                    proc_ids.append((instance, val))
-                except Exception as e:
-                    print(repr(e))
-                    pass
-                win32pdh.RemoveCounter(counter_handle)
+GetLastError = k32.GetLastError
+GetLastError.argtypes = None
+GetLastError.restype = w.DWORD
 
-            except Exception as e:
-                print(repr(e))
-                pass
-            win32pdh.CloseQuery(hq)
-    return proc_ids
+CloseHandle = k32.CloseHandle
+CloseHandle.argtypes = [w.HANDLE]
+CloseHandle.restype = w.BOOL
 
+processHandle = OpenProcess(0x10, False, pid)
 
-if __name__ == "__main__":
-    get_processes()
+addr = 0x000002BD2583D090  # Minesweeper.exe module base address
+data = c.c_char()
+bytesRead = c.c_ulonglong()
+while True:
+    result = ReadProcessMemory(processHandle, addr, c.byref(data), c.sizeof(data), c.byref(bytesRead))
+    e = GetLastError()
+    print('result: {}, err code: {}, bytesRead: {}'.format(result, e, bytesRead.value))
+    print('data: {}'.format(data.value.decode()))
+    time.sleep(1)
