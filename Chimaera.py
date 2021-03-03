@@ -1,6 +1,6 @@
-from KG_CLIENT2 import init_kg, find_rel, id2node, merge_rel
+from KG_CLIENT2 import init_kg, find_rel, id2node, merge_rel, delete_rel
 from SWIP_CLIENT2 import find_all_match, rel_be, append_rule, rel_in, rel_rel
-from NLP_CONSOLE import verify_format
+from NLP_CONSOLE import verify_format, std_rel_str, std_node_str
 
 
 def kg_rel2swip_rel(kgStr):
@@ -27,16 +27,25 @@ def kg2swip(results, symbols):
     return src_context
 
 
-def merge_via_console(kg, text):
+def console_cmd(kg, text):
     valid, a, b, c = verify_format(text)
-    if valid:
-        merge_rel(kg, {'key': 'name', 'val': a}, b.upper(), {'key': 'name', 'val': c})
+    if valid is not None:
+        if valid == 'MERGE':
+            a = std_node_str(a)
+            c = std_node_str(c)
+            merge_rel(kg, {'key': 'name', 'val': a}, std_rel_str(b).upper(), {'key': 'name', 'val': c})
+        elif valid == 'DELETE':
+            a = std_node_str(a)
+            c = std_node_str(c)
+            delete_rel(kg, {'key': 'name', 'val': a}, std_rel_str(b).upper(), {'key': 'name', 'val': c})
 
 
 if __name__ == "__main__":
     kg = init_kg()
-    merge_via_console(kg, 'Romeo loves Juliet')
-    merge_via_console(kg, 'I loves you')
+    console_cmd(kg, 'Romeo loves Juliet')
+    console_cmd(kg, 'you love me')
+    console_cmd(kg, "you aren't loving me")
+    console_cmd(kg, 'you love me')
     rel = 'LOVES'
     results, symbols = find_rel(kg, rel, 100)
     kg_context = kg2swip(results, symbols)
