@@ -1,6 +1,7 @@
 from KG_CLIENT2 import init_kg, find_rel, id2node, merge_rel, delete_rel
-from SWIP_CLIENT2 import find_all_match, rel_be, append_rule, rel_in, rel_rel
-from NLP_CONSOLE import verify_format, std_rel_str, std_node_str
+from Head.SWIP_CLIENT2 import find_all_match, rel_be, rel_rel
+from Arms.NLP_CONSOLE import verify_format, std_rel_str, std_node_str
+from Assimilation.NN_MATRIX import get_matrix
 
 
 def kg_rel2swip_rel(kgStr):
@@ -86,5 +87,6 @@ if __name__ == "__main__":
     results = find_all_match(kg_context, 'loves')
     for result in results:
         node1, sym1 = id2node(kg, result[0])
-        node2, sym2 = id2node(kg, result[1])
-        print(node1[0][sym1[0]]['name'], '<-', node2[0][sym2[0]]['name'])
+        rel_id = result[1]
+        node2, sym2 = id2node(kg, result[2])
+        print(node1[0][sym1[0]]['name'], '-[{}]->'.format(rel_id), node2[0][sym2[0]]['name'])

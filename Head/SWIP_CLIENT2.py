@@ -29,19 +29,19 @@ def append_rule(src_context, type, param):
     return src_context
 
 
-def find_all_match(src_context, dst_rel):
+def find_all_match(src_context, dst_rel, rel_id=1):
     src_context_str = '\n'.join(src_context)
     factory = PengineBuilder(urlserver="http://localhost:4242",
                              srctext=src_context_str,
                              ask=dst_rel + '(X,Y)'
                              )
     pengine = Pengine(builder=factory, debug=False)
-    results=[]
+    results = []
     while pengine.currentQuery.hasMore:
         pengine.doNext(pengine.currentQuery)
     for p in pengine.currentQuery.availProofs:
         print('{} <- {}'.format(p['X'], p['Y']))
-        results.append([p['X'], p['Y']])
+        results.append([p['X'], rel_id, p['Y']])
     return results
 
 
