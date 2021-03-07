@@ -60,7 +60,7 @@ KG+NLP+LISP+Prolog+ANN+Hook=Junk
 ## 名词解释：
 KG（Knowledge Graph）：
 
-包含有状态机的状态标志和状态转移函数的图数据库
+包含有状态机的状态标志（SF）和状态转移函数（STF）的图数据库
 
 SF（State Flags）：
 
