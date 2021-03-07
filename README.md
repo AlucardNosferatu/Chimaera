@@ -18,7 +18,7 @@ KG+NLP+LISP+Prolog+ANN+Hook=Junk
 人称代词的时态会强制转为主格，对应CYPHER中变量的代词代换规则
 
 ## 模块3. Hy：
-从以KG中获取已存在的SFS、STFS，并将其DAG子图解析为广义表（GList），限制DAG图是为了避免存在回路形成递归
+从KG中获取已存在的SFS、STFS，并将其DAG子图解析为广义表（GList），限制DAG图是为了避免存在回路形成递归
 
 得到GList后，用Hy编写状态标志程序（SFP）、状态转移函数程序（STFP），嵌入到GList当中作为实际运行程序
 
