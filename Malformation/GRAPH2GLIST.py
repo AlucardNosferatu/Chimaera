@@ -57,13 +57,18 @@ def rels2glist(rels):
 
 
 def is_tail(gla, glb):
-    if type(glb.tail) is int:
+    if type(glb) is int:
         return False
     else:
-        if gla.head == glb.tail.head and gla.tail == glb.tail.tail and gla.rel == glb.tail.rel:
+        if gla in glb.tail:
             return True
         else:
-            return is_tail(gla, glb.tail)
+            result = False
+            for each in glb.tail:
+                result = result or is_tail(gla, each)
+                if result:
+                    break
+            return result
 
 
 if __name__ == "__main__":
