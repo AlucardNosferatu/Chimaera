@@ -44,15 +44,15 @@ def rels2glist(rels):
         TGL = Glist()
         TGL.rel = b
         TGL.head = a
-        TGL.tail = c
+        TGL.tail = [c]
         start = 0
-        for i in range(tail_list.count(a)):
-            pos = tail_list.index(a, start)
-            glist[pos].tail = TGL
+        for i in range(tail_list.count([a])):
+            pos = tail_list.index([a], start)
+            glist[pos].tail += [TGL]
             start = pos + 1
         glist.append(TGL)
         head_list.append(a)
-        tail_list.append(c)
+        tail_list.append([c])
     return glist, head_list, tail_list
 
 
