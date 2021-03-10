@@ -1,3 +1,5 @@
+
+
 def get_all_symbol(results):
     symbols = []
     for sym_dict in results:

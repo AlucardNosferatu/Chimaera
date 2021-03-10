@@ -25,11 +25,15 @@ def find_rel(kg, rel, limit=None):
 
 def merge_rel(kg, src, rel, dst):
     symbols = ['a', 'b', 'c']
-    init_node = ("MERGE(%s{%s: '%s'}) RETURN %s" % (symbols[0], src['key'], src['val'], symbols[0]))
+    if type(src['val']) is str:
+        src['val'] = "'{}'".format(src['val'])
+    init_node = ("MERGE(%s{%s: %s}) RETURN %s" % (symbols[0], src['key'], src['val'], symbols[0]))
     _ = kg.run(init_node).data()
-    init_node = ("MERGE(%s{%s: '%s'}) RETURN %s" % (symbols[2], dst['key'], dst['val'], symbols[2]))
+    if type(dst['val']) is str:
+        dst['val'] = "'{}'".format(dst['val'])
+    init_node = ("MERGE(%s{%s: %s}) RETURN %s" % (symbols[2], dst['key'], dst['val'], symbols[2]))
     _ = kg.run(init_node).data()
-    cypher_query = "MATCH ({0}),({2}) WHERE {0}.{3}='{4}' AND {2}.{5}='{6}' MERGE ({0})-[{1}:{7}]->({2}) RETURN {0},{1},{2}".format(
+    cypher_query = "MATCH ({0}),({2}) WHERE {0}.{3}={4} AND {2}.{5}={6} MERGE ({0})-[{1}:{7}]->({2}) RETURN {0},{1},{2}".format(
         symbols[0],
         symbols[1],
         symbols[2],
@@ -71,5 +75,41 @@ def id2node(kg, id):
         str(id),
         symbols[0]
     )
+    results = kg.run(cypher_query).data()
+    return results, symbols
+
+
+def dict2props(node_dict):
+    output = '{'
+    for key in node_dict:
+        output += key
+        if type(node_dict[key]) is str:
+            output += ":'"
+            output += str(node_dict[key])
+            output += "',"
+        elif type(node_dict[key]) is int:
+            output += ":"
+            output += str(node_dict[key])
+            output += ","
+    output += '}'
+    output = output.replace(',}', '}')
+    return output
+
+
+def create_node(kg, node_dict, label=None):
+    symbols = ['a']
+    if label is None:
+        cypher_query = "MERGE (%s%s)  RETURN %s" % (
+            symbols[0],
+            dict2props(node_dict),
+            symbols[0]
+        )
+    else:
+        cypher_query = "MERGE (%s:%s%s)  RETURN %s" % (
+            symbols[0],
+            label,
+            dict2props(node_dict),
+            symbols[0]
+        )
     results = kg.run(cypher_query).data()
     return results, symbols

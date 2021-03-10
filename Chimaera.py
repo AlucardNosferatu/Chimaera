@@ -1,4 +1,4 @@
-from KG_CLIENT2 import init_kg, find_rel, id2node, merge_rel, delete_rel
+from KG_CLIENT2 import init_kg, find_rel, id2node, merge_rel, delete_rel, create_node
 from Head.SWIP_CLIENT2 import find_all_match, rel_be, rel_rel, append_rule
 from Arms.NLP_CONSOLE import verify_format, std_rel_str, std_node_str
 from Assimilation.NN_MATRIX import get_matrix
@@ -41,7 +41,7 @@ def console_cmd(kg, text):
             delete_rel(kg, {'key': 'name', 'val': a}, std_rel_str(b).upper(), {'key': 'name', 'val': c})
 
 
-if __name__ == "__main__":
+def test_case_1():
     kg = init_kg()
     # console_cmd(kg, 'Romeo loves Juliet')
     # console_cmd(kg, 'you love me')
@@ -111,3 +111,32 @@ if __name__ == "__main__":
         rel_id = result[1]
         node2, sym2 = id2node(kg, result[2])
         print(node1[0][sym1[0]]['name'], '-[{}]->'.format(rel_id), node2[0][sym2[0]]['name'])
+
+
+def lisp_graph_create_function(kg, func, name, params):
+    results = []
+    symbols = []
+    r, s = create_node(kg, {'name': name, 'func': func}, 'LISP_FUNC')
+    results.append(r)
+    symbols.append(s)
+    for param in params:
+        if type(param) is int:
+            r, s = create_node(kg, {'val': param}, 'LISP_VAL')
+            results.append(r)
+            symbols.append(s)
+            r, s = merge_rel(kg, {'key': 'val', 'val': param}, 'PARAM_OF', {'key': 'name', 'val': name})
+            results.append(r)
+            symbols.append(s)
+        elif type(param) is list:
+            sub_func = param[0]
+            sub_name = param[1]
+            sub_params = param[2]
+            rs, ss = lisp_graph_create_function(kg, sub_func, sub_name, sub_params)
+            results += rs
+            symbols += ss
+    return results, symbols
+
+
+if __name__ == "__main__":
+    kg = init_kg()
+    lisp_graph_create_function(kg, 'add', 'ADD2', [2029, 1224])
