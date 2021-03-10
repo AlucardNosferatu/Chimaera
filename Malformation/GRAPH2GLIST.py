@@ -12,18 +12,18 @@ class Glist:
 def fake_results():
     ids = []
     rel_ids = []
-    for i in range(5):
+    for i in range(1):
         a = np.random.randint(0, 9)
         while a in rel_ids:
             a = np.random.randint(0, 9)
         rel_ids.append(a)
-    for i in range(5):
+    for i in range(4):
         a = np.random.randint(0, 200)
         while a in ids:
             a = np.random.randint(0, 200)
         ids.append(a)
     relationships = []
-    for i in range(20):
+    for i in range(10):
         a = 0
         b = 0
         c = 0
@@ -46,13 +46,16 @@ def rels2glist(rels):
         TGL.head = a
         TGL.tail = [c]
         start = 0
-        for i in range(tail_list.count([a])):
-            pos = tail_list.index([a], start)
+        for i in range(tail_list.count(a)):
+            pos = tail_list.index(a, start)
+            if a in glist[pos].tail:
+                del glist[pos].tail[glist[pos].tail.index(a)]
             glist[pos].tail += [TGL]
+
             start = pos + 1
         glist.append(TGL)
         head_list.append(a)
-        tail_list.append([c])
+        tail_list.append(c)
     return glist, head_list, tail_list
 
 
@@ -72,7 +75,15 @@ def is_tail(gla, glb):
 
 
 if __name__ == "__main__":
-    rels, ids, rel_ids = fake_results()
+    # rels, ids, rel_ids = fake_results()
+    rels=[
+        [1,1,2],
+        [2,1,3],
+        [3,1,4],
+        [1,1,5],
+        [5,1,3],
+        [5,1,6]
+    ]
     glist, head_list, tail_list = rels2glist(rels)
     blacklist = []
     for i in range(len(glist)):
