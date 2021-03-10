@@ -4,6 +4,7 @@ import random
 
 class Glist:
     def __init__(self):
+        self.head = None
         self.tail = None
 
     pass
@@ -12,7 +13,7 @@ class Glist:
 def fake_results():
     ids = []
     rel_ids = []
-    for i in range(1):
+    for i in range(4):
         a = np.random.randint(0, 9)
         while a in rel_ids:
             a = np.random.randint(0, 9)
@@ -36,66 +37,54 @@ def fake_results():
 
 
 def rels2glist(rels):
-    glist = []
-    head_list = []
-    tail_list = []
+    parsed = [False] * len(rels)
+    ids = []
     for rel in rels:
-        a, b, c = rel
-        TGL = Glist()
-        TGL.rel = b
-        TGL.head = a
-        TGL.tail = [c]
-        start = 0
-        for i in range(tail_list.count(a)):
-            pos = tail_list.index(a, start)
-            if a in glist[pos].tail:
-                del glist[pos].tail[glist[pos].tail.index(a)]
-            glist[pos].tail += [TGL]
-
-            start = pos + 1
-        glist.append(TGL)
-        head_list.append(a)
-        tail_list.append(c)
-    return glist, head_list, tail_list
+        if rel[0] not in ids:
+            ids.append(rel[0])
+        if rel[2] not in ids:
+            ids.append(rel[2])
+    glist = []
+    for i in range(len(ids)):
+        SGL = Glist()
+        SGL.tail = []
+        SGL.rel = None
+        SGL.head = ids[i]
+        recursive_linking(parsed, [SGL], rels)
+        glist.append(SGL)
+    return glist
 
 
-def is_tail(gla, glb):
-    if type(glb) is int:
-        return False
-    else:
-        if gla in glb.tail:
-            return True
-        else:
-            result = False
-            for each in glb.tail:
-                result = result or is_tail(gla, each)
-                if result:
-                    break
-            return result
+def recursive_linking(parsed, SGL_list, rels, prev_gl=None):
+    if prev_gl is None:
+        prev_gl = []
+    ngl_list = []
+    if SGL not in prev_gl:
+        prev_gl.append(SGL)
+    for i in range(len(rels)):
+        if not parsed[i]:
+            a, b, c = rels[i]
+            if a == SGL.head:
+                NGL = Glist()
+                NGL.head = c
+                NGL.rel = b
+                NGL.tail = []
+                SGL.tail.append(NGL)
+                ngl_list.append(NGL)
+                prev_gl.append(NGL)
+                parsed[i] = True
+    recursive_linking(parsed, ngl_list, rels, prev_gl=prev_gl)
 
 
 if __name__ == "__main__":
     # rels, ids, rel_ids = fake_results()
-    rels=[
-        [1,1,2],
-        [2,1,3],
-        [3,1,4],
-        [1,1,5],
-        [5,1,3],
-        [5,1,6]
+    # rels = [[110, 4, 78], [163, 6, 9], [9, 7, 110], [78, 7, 163], [110, 7, 9], [78, 8, 9], [9, 6, 163], [110, 7, 78],
+    #         [78, 4, 110], [9, 7, 163]]
+    rels = [
+        [1, 1, 2],
+        [1, 1, 3],
+        [2, 1, 4],
+        [3, 1, 4]
     ]
-    glist, head_list, tail_list = rels2glist(rels)
-    blacklist = []
-    for i in range(len(glist)):
-        gla = glist[i]
-        for j in range(i + 1, len(glist)):
-            glb = glist[j]
-            if is_tail(gla, glb):
-                blacklist.append(i)
-                break
-    blacklist.sort(reverse=True)
-    for pos in blacklist:
-        del glist[pos]
-        del head_list[pos]
-        del tail_list[pos]
+    SGL = rels2glist(rels)
     print('Done')
