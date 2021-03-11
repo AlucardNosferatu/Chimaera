@@ -1,3 +1,5 @@
+import time
+
 from state_machine import *
 import numpy as np
 import random
@@ -99,8 +101,14 @@ class GBody:
     events = []
     initial_state = State(initial=True)
     name = ''
+    ids = []
+    rels = []
+    rel_ids = []
 
     def __init__(self, name, rels, ids, mode=None):
+        self.ids = ids
+        self.rels = rels
+
         if mode is None:
             mode = ['on_dst']
         self.name = name
@@ -108,6 +116,7 @@ class GBody:
             state = State()
             self.states.append(state)
         rel_ids = parse_rel_ids(rels, mode)
+        self.rel_ids = rel_ids
         for rel_id in rel_ids:
             t_state = self.states[ids.index(rel_id[-1])]
             f_states = [self.initial_state]
@@ -119,40 +128,93 @@ class GBody:
             self.events.append(event)
 
 
+def build_class_str(GBInstance):
+    class_head = """
+@acts_as_state_machine
+class {}:
+    name = '{}'
+        """.format(
+        'GBInterface',
+        GBInstance.name
+    )
+
+    class_initial_state = """
+    {} = {}.initial_state
+        """.format(
+        's0',
+        'GWilliam'
+    )
+
+    class_states = class_initial_state
+    for i in range(len(GBInstance.states)):
+        class_state = """
+    {} = {}.states[{}]
+            """.format(
+            's{}'.format(i + 1),
+            'GWilliam',
+            i
+        )
+        class_states += class_state
+
+    class_events = ''
+    for i in range(len(GBInstance.events)):
+        class_event = """
+    {} = {}.events[{}]
+            """.format(
+            'e{}'.format(i),
+            'GWilliam',
+            i
+        )
+        class_events += class_event
+
+    event_annotations = ''
+    for i in range(len(GBInstance.events)):
+        event_annotation = """
+    @before('{}')
+    def before_{}(self):
+        print("before_{}")
+
+    @after('{}')
+    def after_{}(self):
+        print("after_{}")
+            """.format(
+            'e{}'.format(i),
+            'e{}'.format(i),
+            'e{}'.format(i),
+            'e{}'.format(i),
+            'e{}'.format(i),
+            'e{}'.format(i)
+        )
+        event_annotations += event_annotation
+    class_str = class_head + class_states + class_events + event_annotations
+    return class_str, 'GBInterface'
+
+
+def build_class_imp(GBInstance):
+    class_str, imp_name = build_class_str(GBInstance=GBInstance)
+    exec(class_str)
+    class_new = eval(imp_name)
+    return class_new
+
+
+# noinspection PyPep8Naming
+def test_invalid_transition(GBInstance, GIInstance):
+    event_index = 0
+    while True:
+        try:
+            event_index = random.randint(0, len(GBInstance.events) - 1)
+            exec('GIInstance.e{}()'.format(event_index))
+        except InvalidStateTransition:
+            print('This event does not alter current state.')
+            print('Event Index:', event_index, 'Event ID:', GBInstance.rel_ids[event_index])
+            state_str = eval('GIInstance.current_state')
+            print('State Index:', state_str, 'State ID:', GBInstance.ids[int(state_str.replace('s', '')) - 1])
+            time.sleep(1)
+
 if __name__ == "__main__":
-    # test_billy()
     rels, ids, rel_ids = fake_results()
-
     GWilliam = GBody('William', rels, ids)
-
-    @acts_as_state_machine
-    class GBInterface:
-        name = GWilliam.name
-        sleeping = GWilliam.initial_state
-        running = GWilliam.states[0]
-        cleaning = GWilliam.states[1]
-        run = GWilliam.events[0]
-        cleanup = GWilliam.events[1]
-        sleep = GWilliam.events[2]
-
-        @before('sleep')
-        def do_one_thing(self):
-            print("{} is sleepy".format(self.name))
-
-        @before('sleep')
-        def do_another_thing(self):
-            print("{} is REALLY sleepy".format(self.name))
-
-        @after('sleep')
-        def snore(self):
-            print("Zzzzzzzzzzzz")
-
-        @after('sleep')
-        def big_snore(self):
-            print("Zzzzzzzzzzzzzzzzzzzzzz")
-
-
-    GMonster = GBInterface()
-    person = Person()
-    GMonster.sleep()
+    class_new = build_class_imp(GWilliam)
+    GMonster = class_new()
+    test_invalid_transition(GWilliam, GMonster)
     print('Done')
