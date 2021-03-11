@@ -197,19 +197,25 @@ def build_class_imp(GBInstance):
     return class_new
 
 
-# noinspection PyPep8Naming
 def test_invalid_transition(GBInstance, GIInstance):
+    obj_name = 'GIInstance'
+    local_vars = locals().copy()
+    for k, v in local_vars.items():
+        if v is GIInstance:
+            obj_name = k
+            break
     event_index = 0
     while True:
         try:
             event_index = random.randint(0, len(GBInstance.events) - 1)
-            exec('GIInstance.e{}()'.format(event_index))
+            exec('{}.e{}()'.format(obj_name, event_index))
         except InvalidStateTransition:
             print('This event does not alter current state.')
             print('Event Index:', event_index, 'Event ID:', GBInstance.rel_ids[event_index])
-            state_str = eval('GIInstance.current_state')
+            state_str = eval('{}.current_state'.format(obj_name))
             print('State Index:', state_str, 'State ID:', GBInstance.ids[int(state_str.replace('s', '')) - 1])
             time.sleep(1)
+
 
 if __name__ == "__main__":
     rels, ids, rel_ids = fake_results()
