@@ -20,7 +20,9 @@ KG+NLP+LISP+Prolog+ANN+Hook=Junk
 ## 模块3. Hy：
 FSM在状态不变时，特定State下Chimaera对外暴露接口的底层实现模块
 
-从KG中的LISP_VAL和LISP_FUNC节点生成用于表示函数调用树的广义表，将广义表格式化为字符串后调用Hy模块解析执行
+从KG中的LISP_VAL和LISP_FUNC节点生成用于表示函数调用树的广义表
+
+再将广义表格式化为字符串后调用Hy模块解析执行
 
 利用Hy的宏（defmacro）动态更新SI实现元编程
 
