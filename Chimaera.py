@@ -92,6 +92,20 @@ def fsm_graph_create_event(kg, from_name, to_name, specify_rel=None):
         r, s = merge_rel(kg, {'key': 'name', 'val': from_name}, specify_rel, {'key': 'name', 'val': to_name})
 
 
+def fsm_graph_create_event_bidirectional(kg, name1, name2, specify_rel=None):
+    if specify_rel is None:
+        specify_rel = {}
+    if 'to_name2' in specify_rel:
+        r1, s1 = merge_rel(kg, {'key': 'name', 'val': name1}, specify_rel['to_name2'], {'key': 'name', 'val': name2})
+    else:
+        r1, s1 = merge_rel(kg, {'key': 'name', 'val': name1}, 'TO_' + name2, {'key': 'name', 'val': name2})
+    if 'to_name1' in specify_rel:
+        r2, s2 = merge_rel(kg, {'key': 'name', 'val': name2}, specify_rel['to_name1'], {'key': 'name', 'val': name1})
+    else:
+        r2, s2 = merge_rel(kg, {'key': 'name', 'val': name2}, 'TO_' + name1, {'key': 'name', 'val': name1})
+    return r1 + r2, s1 + s2
+
+
 if __name__ == "__main__":
     kg = init_kg()
     # lisp_graph_create_function(kg, 'add', 'ADD2', [2029, 1224])
@@ -99,10 +113,13 @@ if __name__ == "__main__":
     #     ['sub', 'SUB1', [2029, 1224]],
     #     ['sub', 'SUB2', [2029, ['sub', 'SUB1', [2029, 1224]]]]
     # ]
-    fsm_graph_create_state(kg, 'STATE_2', [])
-    fsm_graph_create_state(kg, 'STATE_3', [])
-    fsm_graph_create_event(kg, 'STATE_0', 'STATE_1')
-    fsm_graph_create_event(kg, 'STATE_0', 'STATE_1', 'STATE_0_TO_STATE_1')
-    fsm_graph_create_event(kg, 'STATE_2', 'STATE_1')
-    fsm_graph_create_event(kg, 'STATE_3', 'STATE_1', 'STATE_3_TO_STATE_1')
+    # fsm_graph_create_state(kg, 'STATE_3', [])
+    # fsm_graph_create_event(kg, 'STATE_0', 'STATE_1')
+    # fsm_graph_create_event(kg, 'STATE_0', 'STATE_1', 'STATE_0_TO_STATE_1')
+    # fsm_graph_create_event(kg, 'STATE_2', 'STATE_1')
+    # fsm_graph_create_event(kg, 'STATE_3', 'STATE_1', 'STATE_3_TO_STATE_1')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_1', 'STATE_0')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_2', 'STATE_0')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_3', 'STATE_0')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_4', 'STATE_0')
     print('Done')
