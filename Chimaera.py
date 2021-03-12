@@ -84,11 +84,25 @@ def fsm_graph_create_state(kg, name, funcs):
         symbols.append(s)
 
 
+def fsm_graph_create_event(kg, from_name, to_name, specify_rel=None):
+    if specify_rel is None:
+        r, s = merge_rel(kg, {'key': 'name', 'val': from_name}, 'TO_' + to_name, {'key': 'name', 'val': to_name})
+    else:
+        assert type(specify_rel) is str
+        r, s = merge_rel(kg, {'key': 'name', 'val': from_name}, specify_rel, {'key': 'name', 'val': to_name})
+
+
 if __name__ == "__main__":
     kg = init_kg()
     # lisp_graph_create_function(kg, 'add', 'ADD2', [2029, 1224])
-    funcs = [
-        ['add', 'ADD2', [2029, 1224]],
-        ['add', 'ADD1', [2029, ['add', 'ADD2', [2029, 1224]]]]
-    ]
-    fsm_graph_create_state(kg, 'STATE_0', funcs)
+    # funcs = [
+    #     ['sub', 'SUB1', [2029, 1224]],
+    #     ['sub', 'SUB2', [2029, ['sub', 'SUB1', [2029, 1224]]]]
+    # ]
+    fsm_graph_create_state(kg, 'STATE_2', [])
+    fsm_graph_create_state(kg, 'STATE_3', [])
+    fsm_graph_create_event(kg, 'STATE_0', 'STATE_1')
+    fsm_graph_create_event(kg, 'STATE_0', 'STATE_1', 'STATE_0_TO_STATE_1')
+    fsm_graph_create_event(kg, 'STATE_2', 'STATE_1')
+    fsm_graph_create_event(kg, 'STATE_3', 'STATE_1', 'STATE_3_TO_STATE_1')
+    print('Done')
