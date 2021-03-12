@@ -56,10 +56,10 @@ def build_model():
     return model
 
 
-def parse_model():
-    model = build_model()
+def parse_model(model):
     for layer in model.layers:
-        print(layer.name)
+        to_node = layer.name
+        print(to_node)
         raw_type = str(type(layer)).split('.')[-1].replace("'>", "")
         if raw_type in alias_for_parsing:
             raw_type = alias_for_parsing[raw_type]
@@ -73,9 +73,11 @@ def parse_model():
                     attr = key
                 value = eval('layer.{}'.format(attr))
                 print(key, ':', value)
-        print(layer.input.name.split('/')[0])
+        from_node = layer.input.name.split('/')[0]
+        print('Relationship:', from_node, '->', to_node)
         print()
 
 
 if __name__ == "__main__":
-    parse_model()
+    model = build_model()
+    parse_model(model)
