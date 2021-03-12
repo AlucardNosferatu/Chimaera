@@ -1,16 +1,14 @@
+import hy
 from transitions import Machine
-
-from Assimilation.NN_MATRIX import get_matrix
+from NN_MATRIX import get_matrix
 from Chimaera import kg2swip
 from GRAPH2GLIST import get_symbol_str
-from HY_EXECUTOR import reg_func_tree, force_reload
-from Head.SWIP_CLIENT2 import append_rule, find_all_match
+from HY_EXECUTOR import reg_func_tree, force_reload, reg_func, exe_func, ft
+from SWIP_CLIENT2 import append_rule, find_all_match
 from KG_CLIENT2 import init_kg, find_rel, id2node
 from KG_FSM2 import Matter
-import hy
-import Obsolete.greetings as greetings
 
-from Malformation.HY_EXECUTOR import reg_func, exe_func, ft
+import Obsolete.greetings as greetings
 
 
 def test_1():
