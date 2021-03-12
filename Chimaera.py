@@ -60,9 +60,35 @@ def lisp_graph_create_function(kg, func, name, params):
             rs, ss = lisp_graph_create_function(kg, sub_func, sub_name, sub_params)
             results += rs
             symbols += ss
+            r, s = merge_rel(kg, {'key': 'name', 'val': sub_name}, 'PARAM_OF', {'key': 'name', 'val': name})
+            results.append(r)
+            symbols.append(s)
     return results, symbols
+
+
+def fsm_graph_create_state(kg, name, funcs):
+    results = []
+    symbols = []
+    r, s = create_node(kg, {'name': name}, 'FSM_STATE')
+    results.append(r)
+    symbols.append(s)
+    for func in funcs:
+        sub_func = func[0]
+        sub_name = func[1]
+        sub_params = func[2]
+        rs, ss = lisp_graph_create_function(kg, sub_func, sub_name, sub_params)
+        results += rs
+        symbols += ss
+        r, s = merge_rel(kg, {'key': 'name', 'val': sub_name}, 'FUNC_OF', {'key': 'name', 'val': name})
+        results.append(r)
+        symbols.append(s)
 
 
 if __name__ == "__main__":
     kg = init_kg()
-    lisp_graph_create_function(kg, 'add', 'ADD2', [2029, 1224])
+    # lisp_graph_create_function(kg, 'add', 'ADD2', [2029, 1224])
+    funcs = [
+        ['add', 'ADD2', [2029, 1224]],
+        ['add', 'ADD1', [2029, ['add', 'ADD2', [2029, 1224]]]]
+    ]
+    fsm_graph_create_state(kg, 'STATE_0', funcs)
