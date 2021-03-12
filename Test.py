@@ -8,6 +8,8 @@ from KG_FSM2 import Matter
 import hy
 import Obsolete.greetings as greetings
 
+from Malformation.HY_EXECUTOR import reg_func, exe_func
+
 
 def test_1():
     kg = init_kg()
@@ -114,5 +116,26 @@ def test_4():
     hy.eval(expr)
 
 
+def test_5():
+    reg_func()
+    res = exe_func()
+    print(res)
+    lines = None
+    with open('Malformation/FUNC_STORAGE.py', 'r') as f:
+        lines = f.readlines()
+    lines.append("\n")
+    lines.append("\n")
+    sub1_py_str = """
+def sub1(a, b):
+    return a - b
+"""
+    lines.append(sub1_py_str)
+    with open('Malformation/FUNC_STORAGE.py', 'w') as f:
+        f.writelines(lines)
+    reg_func('sub1')
+    res = exe_func('sub1')
+    print(res)
+
+
 if __name__ == "__main__":
-    test_4()
+    test_5()

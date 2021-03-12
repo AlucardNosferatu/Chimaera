@@ -1,5 +1,6 @@
 import importlib
-import hy
+import os
+
 import FUNC_TEMP as ft
 
 
@@ -7,14 +8,18 @@ def reg_func(name='add1', placeholder=None):
     if placeholder is None:
         placeholder = ['a', 'b']
     placeholder_str = ' '.join(placeholder)
-    with open('FUNC_TEMP.hy', 'r') as f:
+    path=os.getcwd()
+    if path.endswith('Chimaera'):
+        path=os.path.join(path,'Malformation')
+    fthy=os.path.join(path,'FUNC_TEMP.hy')
+    with open(fthy, 'r') as f:
         lines = f.readlines()
     for i in range(len(lines)):
         if not lines[i].endswith('\n'):
             lines[i] += '\n'
     exp_str = "(defn {} [{}] (.{} FUNC_STORAGE {}))\n".format(name, placeholder_str, name, placeholder_str)
     lines.append(exp_str)
-    with open('FUNC_TEMP.hy', 'w') as f:
+    with open(fthy, 'w') as f:
         f.writelines(lines)
 
 
@@ -35,8 +40,4 @@ def exe_func(name='add1', params=None):
 
 
 if __name__ == "__main__":
-    reg_func()
-    res = exe_func()
-    reg_func('sub1')
-    res = exe_func('sub1')
     print('Fuck')
