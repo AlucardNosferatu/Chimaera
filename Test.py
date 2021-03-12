@@ -2,13 +2,15 @@ from transitions import Machine
 
 from Assimilation.NN_MATRIX import get_matrix
 from Chimaera import kg2swip
+from GRAPH2GLIST import get_symbol_str
+from HY_EXECUTOR import reg_func_tree, force_reload
 from Head.SWIP_CLIENT2 import append_rule, find_all_match
 from KG_CLIENT2 import init_kg, find_rel, id2node
 from KG_FSM2 import Matter
 import hy
 import Obsolete.greetings as greetings
 
-from Malformation.HY_EXECUTOR import reg_func, exe_func
+from Malformation.HY_EXECUTOR import reg_func, exe_func, ft
 
 
 def test_1():
@@ -137,5 +139,20 @@ def sub1(a, b):
     print(res)
 
 
+def test_6():
+    results = [
+        {'symbol': 'add1', 'param': 2029, 'pcount': 2},
+        {'symbol': 'add1', 'param': 10, 'pcount': 2},
+        {'symbol': 'sub1', 'param': 'add1', 'pcount': 2},
+        {'symbol': 'sub1', 'param': 2021, 'pcount': 2},
+    ]
+    str2 = get_symbol_str('sub1', results)
+
+    exe_name = reg_func_tree(str2)
+    force_reload()
+    res = eval('ft.{}()'.format(exe_name))
+    print(res)
+
+
 if __name__ == "__main__":
-    test_5()
+    test_6()
