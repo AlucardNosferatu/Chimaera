@@ -1,5 +1,6 @@
 from KG_CLIENT2 import init_kg, merge_rel, delete_rel, create_node
 from NLP_CONSOLE import verify_format, std_rel_str, std_node_str
+from NN_MODEL import build_model, parse_model, layers_schema
 
 
 def kg_rel2swip_rel(kgStr):
@@ -86,40 +87,57 @@ def fsm_graph_create_state(kg, name, funcs):
 
 def fsm_graph_create_event(kg, from_name, to_name, specify_rel=None):
     if specify_rel is None:
-        r, s = merge_rel(kg, {'key': 'name', 'val': from_name}, 'TO_' + to_name, {'key': 'name', 'val': to_name})
+        r, s = merge_rel(kg, {'key': 'name', 'val': from_name}, 'TRANSITION', {'key': 'name', 'val': to_name},
+                         rel_dict={'name': 'TO_' + to_name})
     else:
         assert type(specify_rel) is str
-        r, s = merge_rel(kg, {'key': 'name', 'val': from_name}, specify_rel, {'key': 'name', 'val': to_name})
+        r, s = merge_rel(kg, {'key': 'name', 'val': from_name}, 'TRANSITION', {'key': 'name', 'val': to_name},
+                         rel_dict={'name': specify_rel})
 
 
 def fsm_graph_create_event_bidirectional(kg, name1, name2, specify_rel=None):
     if specify_rel is None:
         specify_rel = {}
     if 'to_name2' in specify_rel:
-        r1, s1 = merge_rel(kg, {'key': 'name', 'val': name1}, specify_rel['to_name2'], {'key': 'name', 'val': name2})
+        r1, s1 = merge_rel(kg, {'key': 'name', 'val': name1}, 'TRANSITION', {'key': 'name', 'val': name2},
+                           rel_dict={'name': specify_rel['to_name2']})
     else:
-        r1, s1 = merge_rel(kg, {'key': 'name', 'val': name1}, 'TO_' + name2, {'key': 'name', 'val': name2})
+        r1, s1 = merge_rel(kg, {'key': 'name', 'val': name1}, 'TRANSITION', {'key': 'name', 'val': name2},
+                           rel_dict={'name': 'TO_' + name2})
     if 'to_name1' in specify_rel:
-        r2, s2 = merge_rel(kg, {'key': 'name', 'val': name2}, specify_rel['to_name1'], {'key': 'name', 'val': name1})
+        r2, s2 = merge_rel(kg, {'key': 'name', 'val': name2}, 'TRANSITION', {'key': 'name', 'val': name1},
+                           rel_dict={'name': specify_rel['to_name1']})
     else:
-        r2, s2 = merge_rel(kg, {'key': 'name', 'val': name2}, 'TO_' + name1, {'key': 'name', 'val': name1})
+        r2, s2 = merge_rel(kg, {'key': 'name', 'val': name2}, 'TRANSITION', {'key': 'name', 'val': name1},
+                           rel_dict={'name': 'TO_' + name1})
     return r1 + r2, s1 + s2
+
+
+def ann_graph_create_layer(kg, layer_node):
+    name = layer_node['name']
+    print(name)
+    type = layer_node['type']
+    print(type)
+    kg_prop = {'name': name, 'type': type}
+    params = layer_node['params']
+    schema = layers_schema[type]
+    for key in params:
+        dtype = schema[key]
+        if dtype in ['str', 'int', 'float']:
+            kg_prop[key] = params[key]
+        elif dtype == 'tuple':
+            kg_prop[key] = str(params[key])
+        print(dtype)
+
+    r, s = create_node(kg, kg_prop, 'ANN_LAYER')
+    return r, s
 
 
 if __name__ == "__main__":
     kg = init_kg()
-    # lisp_graph_create_function(kg, 'add', 'ADD2', [2029, 1224])
-    # funcs = [
-    #     ['sub', 'SUB1', [2029, 1224]],
-    #     ['sub', 'SUB2', [2029, ['sub', 'SUB1', [2029, 1224]]]]
-    # ]
-    # fsm_graph_create_state(kg, 'STATE_3', [])
-    # fsm_graph_create_event(kg, 'STATE_0', 'STATE_1')
-    # fsm_graph_create_event(kg, 'STATE_0', 'STATE_1', 'STATE_0_TO_STATE_1')
-    # fsm_graph_create_event(kg, 'STATE_2', 'STATE_1')
-    # fsm_graph_create_event(kg, 'STATE_3', 'STATE_1', 'STATE_3_TO_STATE_1')
-    fsm_graph_create_event_bidirectional(kg, 'STATE_1', 'STATE_0')
-    fsm_graph_create_event_bidirectional(kg, 'STATE_2', 'STATE_0')
-    fsm_graph_create_event_bidirectional(kg, 'STATE_3', 'STATE_0')
-    fsm_graph_create_event_bidirectional(kg, 'STATE_4', 'STATE_0')
-    print('Done')
+    model = build_model()
+    nodes, rels = parse_model(model=model)
+    for node in nodes:
+        ann_graph_create_layer(kg, node)
+        print()
+        print()

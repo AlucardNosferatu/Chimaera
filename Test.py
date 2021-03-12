@@ -2,7 +2,7 @@ import hy
 import greetings
 from transitions import Machine
 from NN_MATRIX import get_matrix
-from Chimaera import kg2swip
+from Chimaera import kg2swip, fsm_graph_create_event_bidirectional, fsm_graph_create_event
 from GRAPH2GLIST import get_symbol_str
 from HY_EXECUTOR import reg_func_tree, force_reload, reg_func, exe_func, ft
 from SWIP_CLIENT2 import append_rule, find_all_match
@@ -151,5 +151,24 @@ def test_6():
     print(res)
 
 
+def test_7():
+    kg = init_kg()
+    # lisp_graph_create_function(kg, 'add', 'ADD2', [2029, 1224])
+    # funcs = [
+    #     ['sub', 'SUB1', [2029, 1224]],
+    #     ['sub', 'SUB2', [2029, ['sub', 'SUB1', [2029, 1224]]]]
+    # ]
+    # fsm_graph_create_state(kg, 'STATE_3', [])
+    fsm_graph_create_event(kg, 'STATE_0', 'STATE_1')
+    fsm_graph_create_event(kg, 'STATE_0', 'STATE_1', 'STATE_0_TO_STATE_1')
+    fsm_graph_create_event(kg, 'STATE_2', 'STATE_1')
+    fsm_graph_create_event(kg, 'STATE_3', 'STATE_1', 'STATE_3_TO_STATE_1')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_1', 'STATE_0')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_2', 'STATE_0')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_3', 'STATE_0')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_4', 'STATE_0')
+    print('Done')
+
+
 if __name__ == "__main__":
-    test_6()
+    test_7()

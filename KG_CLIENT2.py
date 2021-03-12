@@ -23,7 +23,7 @@ def find_rel(kg, rel, limit=None):
     return results, symbols
 
 
-def merge_rel(kg, src, rel, dst):
+def merge_rel(kg, src, rel, dst, rel_dict=None):
     symbols = ['a', 'b', 'c']
     if type(src['val']) is str:
         src['val'] = "'{}'".format(src['val'])
@@ -33,6 +33,8 @@ def merge_rel(kg, src, rel, dst):
         dst['val'] = "'{}'".format(dst['val'])
     init_node = ("MERGE(%s{%s: %s}) RETURN %s" % (symbols[2], dst['key'], dst['val'], symbols[2]))
     _ = kg.run(init_node).data()
+    if rel_dict is not None:
+        rel += dict2props(rel_dict)
     cypher_query = "MATCH ({0}),({2}) WHERE {0}.{3}={4} AND {2}.{5}={6} MERGE ({0})-[{1}:{7}]->({2}) RETURN {0},{1},{2}".format(
         symbols[0],
         symbols[1],
@@ -87,7 +89,7 @@ def dict2props(node_dict):
             output += ":'"
             output += str(node_dict[key])
             output += "',"
-        elif type(node_dict[key]) is int:
+        elif type(node_dict[key]) in [int, float]:
             output += ":"
             output += str(node_dict[key])
             output += ","

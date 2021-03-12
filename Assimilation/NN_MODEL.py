@@ -8,17 +8,17 @@ layers_schema = {
     'Conv2D': {
         'filters': 'int',
         'kernel_size': 'int',
-        'padding': ['same', 'valid'],
-        'activation': ['relu', 'softmax', 'tanh', 'sigmoid']
+        'padding': 'str',
+        'activation': 'str'
     },
     'MaxPool2D': {
         'pool_size': 'tuple'
     },
-    'BatchNormalization': None,
-    'Flatten': None,
+    'BatchNormalization': {},
+    'Flatten': {},
     'Dense': {
         'units': 'int',
-        'activation': ['relu', 'softmax', 'tanh', 'sigmoid']
+        'activation': 'str'
     },
     'Dropout': {
         'rate': 'float'
@@ -30,8 +30,21 @@ alias_for_parsing = {
 }
 embedded_attributes = {
     'activation': 'activation.__name__',
-    'shape': 'input_shape'
+    'shape': 'input_shape',
+    'kernel_size': 'kernel_size[0]'
 }
+
+sp_list = {'Input': ['shape']}
+
+
+def special_process(info, layer_type, param_key):
+    if layer_type == 'Input':
+        if param_key == 'shape':
+            return info[0][1:]
+        else:
+            return info
+    else:
+        return info
 
 
 def build_model():
@@ -57,6 +70,8 @@ def build_model():
 
 
 def parse_model(model):
+    nodes = []
+    rels = []
     for layer in model.layers:
         to_node = layer.name
         print(to_node)
@@ -65,19 +80,25 @@ def parse_model(model):
             raw_type = alias_for_parsing[raw_type]
         print('Layer type:', raw_type)
         schema = layers_schema[raw_type]
-        if schema is not None:
-            for key in schema:
-                if key in embedded_attributes:
-                    attr = embedded_attributes[key]
-                else:
-                    attr = key
-                value = eval('layer.{}'.format(attr))
-                print(key, ':', value)
+        node_properties = {}
+        for key in schema:
+            if key in embedded_attributes:
+                attr = embedded_attributes[key]
+            else:
+                attr = key
+            value = eval('layer.{}'.format(attr))
+            print(key, ':', value)
+            node_properties[key] = value
+        nodes.append({'name': to_node, 'type': raw_type, 'params': node_properties})
         from_node = layer.input.name.split('/')[0]
         print('Relationship:', from_node, '->', to_node)
+        if from_node != to_node:
+            rels.append({'from': from_node, 'to': to_node})
         print()
+    return nodes, rels
 
 
 if __name__ == "__main__":
     model = build_model()
-    parse_model(model)
+    nodes, rels = parse_model(model)
+    print('Done')
