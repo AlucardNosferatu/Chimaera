@@ -133,11 +133,30 @@ def ann_graph_create_layer(kg, layer_node):
     return r, s
 
 
+def ann_graph_link_layers(kg, rel):
+    from_name = rel['from']
+    to_name = rel['to']
+    r, s = merge_rel(kg, {'key': 'name', 'val': from_name}, 'FLOW_TO', {'key': 'name', 'val': to_name})
+    return r, s
+
+
+def ann_graph_link_all_layers(kg, rels):
+    results = []
+    symbols = []
+    for rel in rels:
+        print(rel)
+        r, s = ann_graph_link_layers(kg, rel)
+        results.append(r)
+        symbols.append(s)
+    return results, symbols
+
+
 if __name__ == "__main__":
     kg = init_kg()
     model = build_model()
     nodes, rels = parse_model(model=model)
-    for node in nodes:
-        ann_graph_create_layer(kg, node)
-        print()
-        print()
+    # for node in nodes:
+    #     ann_graph_create_layer(kg, node)
+    #     print()
+    #     print()
+    ann_graph_link_all_layers(kg, rels)
