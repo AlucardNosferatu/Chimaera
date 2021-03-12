@@ -151,6 +151,30 @@ def ann_graph_link_all_layers(kg, rels):
     return results, symbols
 
 
+def ann_graph_link_metadata(kg, rels, compilation):
+    results = []
+    symbols = []
+    from_list = []
+    to_list = []
+    for rel in rels:
+        from_list.append(rel['from'])
+        to_list.append(rel['to'])
+    input_node = list(set(from_list).difference(set(to_list)))[0]
+    output_node = list(set(to_list).difference(set(from_list)))[0]
+    compilation['input_node'] = input_node
+    compilation['output_node'] = output_node
+    r, s = create_node(kg, compilation, 'ANN_METADATA')
+    results.append(r)
+    symbols.append(s)
+    r, s = merge_rel(kg, {'key': 'name', 'val': output_node}, 'FLOW_TO', {'key': 'name', 'val': compilation['name']})
+    results.append(r)
+    symbols.append(s)
+    r, s = merge_rel(kg, {'key': 'name', 'val': compilation['name']}, 'FLOW_TO', {'key': 'name', 'val': input_node})
+    results.append(r)
+    symbols.append(s)
+    return results, symbols
+
+
 if __name__ == "__main__":
     kg = init_kg()
     model = build_model()
@@ -159,4 +183,6 @@ if __name__ == "__main__":
     #     ann_graph_create_layer(kg, node)
     #     print()
     #     print()
-    ann_graph_link_all_layers(kg, rels)
+    # ann_graph_link_all_layers(kg, rels)
+    comp = {'name': 'TOY_CNN', 'loss': 'categorical_crossentropy', 'optimizer': 'rmsprop'}
+    ann_graph_link_metadata(kg, rels, comp)
