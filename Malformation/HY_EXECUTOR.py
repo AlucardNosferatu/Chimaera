@@ -28,6 +28,7 @@ def exe_func(name='add1', params=None):
             params[i] = "{}".format(params[i])
     params_str = ', '.join(params)
     importlib.reload(ft)
+    importlib.reload(ft.FUNC_STORAGE)
     eval_str = 'ft.{}({})'.format(name, params_str)
     res = eval(eval_str)
     return res
@@ -35,5 +36,7 @@ def exe_func(name='add1', params=None):
 
 if __name__ == "__main__":
     reg_func()
-    exe_func()
+    res = exe_func()
+    reg_func('sub1')
+    res = exe_func('sub1')
     print('Fuck')
