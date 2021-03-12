@@ -1,5 +1,5 @@
 from KG_CLIENT2 import init_kg, merge_rel, delete_rel, create_node
-from Arms.NLP_CONSOLE import verify_format, std_rel_str, std_node_str
+from NLP_CONSOLE import verify_format, std_rel_str, std_node_str
 
 
 def kg_rel2swip_rel(kgStr):
@@ -61,6 +61,7 @@ def lisp_graph_create_function(kg, func, name, params):
             results += rs
             symbols += ss
     return results, symbols
+
 
 if __name__ == "__main__":
     kg = init_kg()

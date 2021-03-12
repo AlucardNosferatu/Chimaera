@@ -1,4 +1,5 @@
 import hy
+import greetings
 from transitions import Machine
 from NN_MATRIX import get_matrix
 from Chimaera import kg2swip
@@ -7,8 +8,6 @@ from HY_EXECUTOR import reg_func_tree, force_reload, reg_func, exe_func, ft
 from SWIP_CLIENT2 import append_rule, find_all_match
 from KG_CLIENT2 import init_kg, find_rel, id2node
 from KG_FSM2 import Matter
-
-import Obsolete.greetings as greetings
 
 
 def test_1():
