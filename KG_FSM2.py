@@ -1,8 +1,7 @@
-import time
-
-from transitions import Machine
-import numpy as np
 import random
+
+import numpy as np
+from transitions import Machine
 
 
 class Matter(object):
@@ -54,29 +53,6 @@ def parse_rel_ids(rels, mode):
         return rels
 
 
-def tutorial():
-    model = Matter()
-
-    # The states argument defines the name of states
-    states = ['solid', 'liquid', 'gas', 'plasma']
-
-    # The trigger argument defines the name of the new triggering method
-    transitions = [
-        {'trigger': 'melt', 'source': 'solid', 'dest': 'liquid'},
-        {'trigger': 'evaporate', 'source': 'liquid', 'dest': 'gas'},
-        {'trigger': 'sublimate', 'source': 'solid', 'dest': 'gas'},
-        {'trigger': 'ionize', 'source': 'gas', 'dest': 'plasma'}]
-
-    machine = Machine(model=model, states=states, transitions=transitions, initial='solid')
-
-    # Test
-    print(model.state)  # solid
-    model.melt()
-    print(model.state)  # liquid
-    model.evaporate()
-    print(model.state)
-
-
 def get_transitions(rels, ids, mode=None):
     if mode is None:
         mode = ['on_dst']
@@ -110,13 +86,13 @@ if __name__ == "__main__":
     while True:
         try:
             event_index = random.randint(0, len(fsm_rel_ids) - 1)
-            exec('model.t{}()'.format(event_index))
-            print('Triggered:', 's{}'.format(event_index))
+            model.trigger('t{}'.format(event_index))
+            print('Triggered:', 't{}'.format(event_index))
             print('Current state:', model.state)
         except Exception as e:
             continue
             print(repr(e))
-            print('Attempted to trigger:', 's{}'.format(event_index))
+            print('Attempted to trigger:', 't{}'.format(event_index))
             print('Current state:', model.state)
             # time.sleep(1)
         print('')
