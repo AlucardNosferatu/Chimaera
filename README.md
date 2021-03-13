@@ -1,5 +1,8 @@
 # Chimaera
 KG+NLP+LISP+Prolog+ANN+Hook=Junk
+
+![image](https://github.com/AlucardNosferatu/Chimaera/raw/main/README.jpg)
+
 # 名词解释：
 ### KG（Knowledge Graph）：
 包含有状态机的状态标志（SS）和状态转移标志（TS）的图数据库
