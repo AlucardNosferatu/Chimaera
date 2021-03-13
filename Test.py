@@ -14,10 +14,11 @@ from KG_FSM2 import Matter
 
 def test_1():
     kg = init_kg()
-    console_cmd(kg, 'Romeo loves Juliet')
-    console_cmd(kg, 'Scrooge loves Carol')
-    console_cmd(kg, 'Juliet loves Romeo')
-    console_cmd(kg, 'Carol love Scrooge')
+    # console_cmd(kg, 'Romeo loves Juliet')
+    # console_cmd(kg, 'Scrooge loves Carol')
+    # console_cmd(kg, 'Juliet loves Romeo')
+    # console_cmd(kg, 'Carol love Scrooge')
+
     rel = 'PRECEDES'
     results, symbols = find_rel(kg, rel, 100, {'word': 'loves'})
     kg_context = kg2swip(results, symbols)
@@ -120,7 +121,6 @@ def test_5():
     reg_func()
     res = exe_func()
     print(res)
-    lines = None
     with open('Malformation/FUNC_STORAGE.py', 'r') as f:
         lines = f.readlines()
     lines.append("\n")
@@ -160,14 +160,14 @@ def test_7():
     #     ['sub', 'SUB2', [2029, ['sub', 'SUB1', [2029, 1224]]]]
     # ]
     # fsm_graph_create_state(kg, 'STATE_3', [])
-    fsm_graph_create_event(kg, 'STATE_0', 'STATE_1')
-    fsm_graph_create_event(kg, 'STATE_0', 'STATE_1', 'STATE_0_TO_STATE_1')
-    fsm_graph_create_event(kg, 'STATE_2', 'STATE_1')
-    fsm_graph_create_event(kg, 'STATE_3', 'STATE_1', 'STATE_3_TO_STATE_1')
-    fsm_graph_create_event_bidirectional(kg, 'STATE_1', 'STATE_0')
-    fsm_graph_create_event_bidirectional(kg, 'STATE_2', 'STATE_0')
-    fsm_graph_create_event_bidirectional(kg, 'STATE_3', 'STATE_0')
-    fsm_graph_create_event_bidirectional(kg, 'STATE_4', 'STATE_0')
+    # fsm_graph_create_event(kg, 'STATE_0', 'STATE_1')
+    # fsm_graph_create_event(kg, 'STATE_0', 'STATE_1', 'STATE_0_TO_STATE_1')
+    # fsm_graph_create_event(kg, 'STATE_2', 'STATE_1')
+    # fsm_graph_create_event(kg, 'STATE_3', 'STATE_1', 'STATE_3_TO_STATE_1')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_1', 'STATE_2')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_2', 'STATE_3')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_3', 'STATE_4')
+    fsm_graph_create_event_bidirectional(kg, 'STATE_4', 'STATE_1')
     print('Done')
 
 
@@ -181,13 +181,15 @@ def test_8():
     #     print()
     # ann_graph_link_all_layers(kg, rels)
     in_node, out_node = get_io_node_for_naive_model(rels)
-    comp = {'name': 'TOY_CNN', 'type': 'compilation', 'loss': 'categorical_crossentropy', 'optimizer': 'rmsprop'}
-    train = {'name': 'TOY_CNN', 'type': 'training', 'batch_size': 32, 'epochs': 100}
-    weights_sav = {'name': 'TOY_CNN', 'type': 'weights_saving', 'when': 'after_training', 'filepath': 'TOY_CNN.h5'}
-    ann_graph_link_metadata(kg, in_node, out_node, comp)
-    ann_graph_link_metadata(kg, in_node, out_node, train)
-    ann_graph_link_metadata(kg, in_node, out_node, weights_sav)
+    # comp = {'name': 'TOY_CNN', 'type': 'compilation', 'loss': 'categorical_crossentropy', 'optimizer': 'rmsprop'}
+    # train = {'name': 'TOY_CNN', 'type': 'training', 'batch_size': 32, 'epochs': 100}
+    # weights_sav = {'name': 'TOY_CNN', 'type': 'weights_saving', 'when': 'after_training', 'filepath': 'TOY_CNN.h5'}
+    custom = {'name': 'TOY_CNN', 'type': 'custom_metadata', 'description': 'This is a sample CNN.'}
+    # ann_graph_link_metadata(kg, in_node, out_node, comp)
+    # ann_graph_link_metadata(kg, in_node, out_node, train)
+    # ann_graph_link_metadata(kg, in_node, out_node, weights_sav)
+    ann_graph_link_metadata(kg, in_node, out_node, custom)
 
 
 if __name__ == "__main__":
-    test_1()
+    test_7()

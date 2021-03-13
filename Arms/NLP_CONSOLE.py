@@ -21,7 +21,12 @@ pronoun = {
 errata = {
     'Juliet': 'NNP',
     'loves': 'VBZ',
-    'Romeo': 'NNP'
+    'Romeo': 'NNP',
+    'eats': 'VBZ',
+    'beret': 'NN',
+    'girl': 'NN',
+    'legs': 'NNS',
+    'hobby': 'NN'
 }
 
 
@@ -46,9 +51,9 @@ def merge_matcher(result):
             result[i] = list(result[i])
             if result[i][0] in errata:
                 result[i][1] = errata[result[i][0]]
-        if result[0][1].startswith('NN') or result[0][1] == 'PRP':
+        if result[0][1].startswith('NN') or result[0][1] in ['PRP', 'VBG']:
             if result[1][1].startswith('VB'):
-                if result[0][1].startswith('NN') or result[0][1] == 'PRP':
+                if result[2][1].startswith('NN') or result[2][1] in ['PRP', 'VBG']:
                     matched = 'MERGE'
                     print('Matched:', matched)
                     a = result[0][0]
@@ -98,6 +103,7 @@ def delete_matcher(result):
 
 def verify_format(text):
     result = nltk.pos_tag(nltk.word_tokenize(text))
+    print(result)
     matched, a, b, c = merge_matcher(result)
     if matched is None:
         matched, a, b, c = delete_matcher(result)

@@ -44,6 +44,8 @@ def console_cmd(kg, text):
                 {'key': 'name', 'val': c, 'type': 'NLP_NODE'},
                 {'word': std_rel_str(b)}
             )
+    else:
+        print('Cannot detect valid command!')
     return r, s
 
 
@@ -189,3 +191,6 @@ def ann_graph_link_metadata(kg, input_node, output_node, metadata_dict):
 
 if __name__ == "__main__":
     kg = init_kg()
+    while True:
+        cmd = input()
+        console_cmd(kg, cmd)
