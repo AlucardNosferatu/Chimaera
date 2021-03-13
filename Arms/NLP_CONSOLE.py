@@ -18,6 +18,12 @@ pronoun = {
     'them': 'they'
 }
 
+errata = {
+    'Juliet': 'NNP',
+    'loves': 'VBZ',
+    'Romeo': 'NNP'
+}
+
 
 def std_rel_str(rel):
     rel = conjugate(rel, '3sg')
@@ -36,6 +42,10 @@ def merge_matcher(result):
     c = None
     matched = None
     if len(result) == 3:
+        for i in range(len(result)):
+            result[i] = list(result[i])
+            if result[i][0] in errata:
+                result[i][1] = errata[result[i][0]]
         if result[0][1].startswith('NN') or result[0][1] == 'PRP':
             if result[1][1].startswith('VB'):
                 if result[0][1].startswith('NN') or result[0][1] == 'PRP':

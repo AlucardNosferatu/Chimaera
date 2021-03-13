@@ -2,84 +2,85 @@ import hy
 import greetings
 from transitions import Machine
 from NN_MATRIX import get_matrix
-from Chimaera import kg2swip, fsm_graph_create_event_bidirectional, fsm_graph_create_event
+from Chimaera import kg2swip, fsm_graph_create_event_bidirectional, fsm_graph_create_event, get_io_node_for_naive_model, \
+    ann_graph_link_metadata, console_cmd
 from GRAPH2GLIST import get_symbol_str
 from HY_EXECUTOR import reg_func_tree, force_reload, reg_func, exe_func, ft
-from SWIP_CLIENT2 import append_rule, find_all_match
+from NN_MODEL import build_model, parse_model
+from SWIP_CLIENT2 import append_rule, find_all_match, rel_be, rel_rel, rel_in
 from KG_CLIENT2 import init_kg, find_rel, id2node
 from KG_FSM2 import Matter
 
 
 def test_1():
     kg = init_kg()
-    # console_cmd(kg, 'Romeo loves Juliet')
-    # console_cmd(kg, 'you love me')
-    # console_cmd(kg, "you aren't loving me")
-    # console_cmd(kg, 'you love me')
-    rel = 'ACTED_IN'
-    results, symbols = find_rel(kg, rel, 100)
+    console_cmd(kg, 'Romeo loves Juliet')
+    console_cmd(kg, 'Scrooge loves Carol')
+    console_cmd(kg, 'Juliet loves Romeo')
+    console_cmd(kg, 'Carol love Scrooge')
+    rel = 'PRECEDES'
+    results, symbols = find_rel(kg, rel, 100, {'word': 'loves'})
     kg_context = kg2swip(results, symbols)
-    # rel2 = 'DIRECTED'
-    # results, symbols = find_rel(kg, rel2)
-    # kg_context += kg2swip(results, symbols)
 
-    # rel_swip = kg_rel2swip_rel(rel)
-    # be_rel_swip = rel_be(rel_swip)
-    # rel_rel_swip = rel_rel(rel_swip, rel_swip)
-    # if rel_in(kg_context, be_rel_swip):
-    #     kg_context = append_rule(kg_context, 'rel_be', be_rel_swip)
-    # elif rel_in(kg_context, rel_swip):
-    #     kg_context = append_rule(kg_context, 'rel_be', rel_swip)
-    #     kg_context = append_rule(kg_context, 'rel_rel', [rel_swip, rel_swip])
-    # else:
-    #     raise ValueError('Neither rel not be_rel can be found in context')
-    kg_context = append_rule(
-        kg_context,
-        'custom',
-        'work_with_often(X,Y) :- {}(X,A), {}(Y,A), {}(X,B), {}(Y,B), {}(X,C), {}(Y,C), A\\=B, B\\=C, C\\=A, X\\=Y.'.format(
-            'acted_in',
-            'acted_in',
-            'acted_in',
-            'acted_in',
-            'acted_in',
-            'acted_in'
-        )
-    )
-    kg_context = append_rule(
-        kg_context,
-        'custom',
-        'work_with_twice(X,Y) :- {}(X,A), {}(Y,A), {}(X,B), {}(Y,B), A\\=B, X\\=Y, \\+{}(X,Y), \\+{}(Y,X).'.format(
-            'acted_in',
-            'acted_in',
-            'acted_in',
-            'acted_in',
-            'work_with_often',
-            'work_with_often'
-        )
-    )
-    kg_context = append_rule(
-        kg_context,
-        'custom',
-        'work_with_once(X,Y) :- {}(X,A), {}(Y,A), X\\=Y, \\+{}(X,Y), \\+{}(Y,X), \\+{}(X,Y), \\+{}(Y,X).'.format(
-            'acted_in',
-            'acted_in',
-            'work_with_often',
-            'work_with_often',
-            'work_with_twice',
-            'work_with_twice'
-        )
-    )
-    results1, ids1 = find_all_match(kg_context, 'work_with_often', rel_id=1)
-    results2, ids2 = find_all_match(kg_context, 'work_with_twice', rel_id=2)
-    results3, ids3 = find_all_match(kg_context, 'work_with_once', rel_id=3)
-    results = results1 + results2 + results3
-    ids = ids1 + ids2 + ids3
-    m3, m2 = get_matrix(results, list(set(ids)), [1, 2, 3])
-    for result in results:
-        node1, sym1 = id2node(kg, result[0])
-        rel_id = result[1]
-        node2, sym2 = id2node(kg, result[2])
-        print(node1[0][sym1[0]]['name'], '-[{}]->'.format(rel_id), node2[0][sym2[0]]['name'])
+    rel_swip = 'loves'
+    be_rel_swip = rel_be(rel_swip)
+    rel_rel_swip = rel_rel(rel_swip, rel_swip)
+    if rel_in(kg_context, be_rel_swip):
+        kg_context = append_rule(kg_context, 'rel_be', be_rel_swip)
+    elif rel_in(kg_context, rel_swip):
+        kg_context = append_rule(kg_context, 'rel_be', rel_swip)
+        kg_context = append_rule(kg_context, 'rel_rel', [rel_swip, rel_swip])
+    else:
+        raise ValueError('Neither rel not be_rel can be found in context')
+    for exp in kg_context:
+        print(exp)
+    # kg_context = append_rule(
+    #     kg_context,
+    #     'custom',
+    #     'work_with_often(X,Y) :- {}(X,A), {}(Y,A), {}(X,B), {}(Y,B), {}(X,C), {}(Y,C), A\\=B, B\\=C, C\\=A, X\\=Y.'.format(
+    #         'acted_in',
+    #         'acted_in',
+    #         'acted_in',
+    #         'acted_in',
+    #         'acted_in',
+    #         'acted_in'
+    #     )
+    # )
+    # kg_context = append_rule(
+    #     kg_context,
+    #     'custom',
+    #     'work_with_twice(X,Y) :- {}(X,A), {}(Y,A), {}(X,B), {}(Y,B), A\\=B, X\\=Y, \\+{}(X,Y), \\+{}(Y,X).'.format(
+    #         'acted_in',
+    #         'acted_in',
+    #         'acted_in',
+    #         'acted_in',
+    #         'work_with_often',
+    #         'work_with_often'
+    #     )
+    # )
+    # kg_context = append_rule(
+    #     kg_context,
+    #     'custom',
+    #     'work_with_once(X,Y) :- {}(X,A), {}(Y,A), X\\=Y, \\+{}(X,Y), \\+{}(Y,X), \\+{}(X,Y), \\+{}(Y,X).'.format(
+    #         'acted_in',
+    #         'acted_in',
+    #         'work_with_often',
+    #         'work_with_often',
+    #         'work_with_twice',
+    #         'work_with_twice'
+    #     )
+    # )
+    # results1, ids1 = find_all_match(kg_context, 'work_with_often', rel_id=1)
+    # results2, ids2 = find_all_match(kg_context, 'work_with_twice', rel_id=2)
+    # results3, ids3 = find_all_match(kg_context, 'work_with_once', rel_id=3)
+    # results = results1 + results2 + results3
+    # ids = ids1 + ids2 + ids3
+    # m3, m2 = get_matrix(results, list(set(ids)), [1, 2, 3])
+    # for result in results:
+    #     node1, sym1 = id2node(kg, result[0])
+    #     rel_id = result[1]
+    #     node2, sym2 = id2node(kg, result[2])
+    #     print(node1[0][sym1[0]]['name'], '-[{}]->'.format(rel_id), node2[0][sym2[0]]['name'])
 
 
 def test_2():
@@ -170,5 +171,23 @@ def test_7():
     print('Done')
 
 
+def test_8():
+    kg = init_kg()
+    model = build_model()
+    nodes, rels = parse_model(model=model)
+    # for node in nodes:
+    #     ann_graph_create_layer(kg, node)
+    #     print()
+    #     print()
+    # ann_graph_link_all_layers(kg, rels)
+    in_node, out_node = get_io_node_for_naive_model(rels)
+    comp = {'name': 'TOY_CNN', 'type': 'compilation', 'loss': 'categorical_crossentropy', 'optimizer': 'rmsprop'}
+    train = {'name': 'TOY_CNN', 'type': 'training', 'batch_size': 32, 'epochs': 100}
+    weights_sav = {'name': 'TOY_CNN', 'type': 'weights_saving', 'when': 'after_training', 'filepath': 'TOY_CNN.h5'}
+    ann_graph_link_metadata(kg, in_node, out_node, comp)
+    ann_graph_link_metadata(kg, in_node, out_node, train)
+    ann_graph_link_metadata(kg, in_node, out_node, weights_sav)
+
+
 if __name__ == "__main__":
-    test_7()
+    test_1()

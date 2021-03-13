@@ -3,23 +3,15 @@ from NLP_CONSOLE import verify_format, std_rel_str, std_node_str
 from NN_MODEL import build_model, parse_model, layers_schema
 
 
-def kg_rel2swip_rel(kgStr):
-    return kgStr.lower()
-
-
-def swip_rel2kg_rel(swipStr):
-    return swipStr.upper()
-
-
 def kg2swip(results, symbols):
     src_context = []
     for result in results:
         a = str(result[symbols[0]].identity)
         c = str(result[symbols[2]].identity)
-        b = type(result[symbols[1]]).__name__
+        b = result[symbols[1]]['word']
         src_context.append(
             "{}({}, {}).".format(
-                kg_rel2swip_rel(b),
+                b,
                 a,
                 c
             )
@@ -29,15 +21,30 @@ def kg2swip(results, symbols):
 
 def console_cmd(kg, text):
     valid, a, b, c = verify_format(text)
+    r = None
+    s = None
     if valid is not None:
         if valid == 'MERGE':
             a = std_node_str(a)
             c = std_node_str(c)
-            merge_rel(kg, {'key': 'name', 'val': a}, std_rel_str(b).upper(), {'key': 'name', 'val': c})
+            r, s = merge_rel(
+                kg,
+                {'key': 'name', 'val': a, 'type': 'NLP_NODE'},
+                'PRECEDES',
+                {'key': 'name', 'val': c, 'type': 'NLP_NODE'},
+                {'word': std_rel_str(b)}
+            )
         elif valid == 'DELETE':
             a = std_node_str(a)
             c = std_node_str(c)
-            delete_rel(kg, {'key': 'name', 'val': a}, std_rel_str(b).upper(), {'key': 'name', 'val': c})
+            r, s = delete_rel(
+                kg,
+                {'key': 'name', 'val': a, 'type': 'NLP_NODE'},
+                'PRECEDES',
+                {'key': 'name', 'val': c, 'type': 'NLP_NODE'},
+                {'word': std_rel_str(b)}
+            )
+    return r, s
 
 
 def lisp_graph_create_function(kg, func, name, params):
@@ -151,9 +158,7 @@ def ann_graph_link_all_layers(kg, rels):
     return results, symbols
 
 
-def ann_graph_link_metadata(kg, rels, compilation):
-    results = []
-    symbols = []
+def get_io_node_for_naive_model(rels):
     from_list = []
     to_list = []
     for rel in rels:
@@ -161,15 +166,22 @@ def ann_graph_link_metadata(kg, rels, compilation):
         to_list.append(rel['to'])
     input_node = list(set(from_list).difference(set(to_list)))[0]
     output_node = list(set(to_list).difference(set(from_list)))[0]
-    compilation['input_node'] = input_node
-    compilation['output_node'] = output_node
-    r, s = create_node(kg, compilation, 'ANN_METADATA')
+    return input_node, output_node
+
+
+def ann_graph_link_metadata(kg, input_node, output_node, metadata_dict):
+    results = []
+    symbols = []
+
+    metadata_dict['input_node'] = input_node
+    metadata_dict['output_node'] = output_node
+    r, s = create_node(kg, metadata_dict, 'ANN_METADATA')
     results.append(r)
     symbols.append(s)
-    r, s = merge_rel(kg, {'key': 'name', 'val': output_node}, 'FLOW_TO', {'key': 'name', 'val': compilation['name']})
+    r, s = merge_rel(kg, {'key': 'name', 'val': output_node}, 'FLOW_TO', {'key': 'name', 'val': metadata_dict['name']})
     results.append(r)
     symbols.append(s)
-    r, s = merge_rel(kg, {'key': 'name', 'val': compilation['name']}, 'FLOW_TO', {'key': 'name', 'val': input_node})
+    r, s = merge_rel(kg, {'key': 'name', 'val': metadata_dict['name']}, 'FLOW_TO', {'key': 'name', 'val': input_node})
     results.append(r)
     symbols.append(s)
     return results, symbols
@@ -177,12 +189,3 @@ def ann_graph_link_metadata(kg, rels, compilation):
 
 if __name__ == "__main__":
     kg = init_kg()
-    model = build_model()
-    nodes, rels = parse_model(model=model)
-    # for node in nodes:
-    #     ann_graph_create_layer(kg, node)
-    #     print()
-    #     print()
-    # ann_graph_link_all_layers(kg, rels)
-    comp = {'name': 'TOY_CNN', 'loss': 'categorical_crossentropy', 'optimizer': 'rmsprop'}
-    ann_graph_link_metadata(kg, rels, comp)

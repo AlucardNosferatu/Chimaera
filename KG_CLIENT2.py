@@ -6,8 +6,10 @@ def init_kg():
     return kg
 
 
-def find_rel(kg, rel, limit=None):
+def find_rel(kg, rel, limit=None, rel_dict=None):
     symbols = ['a', 'b', 'c']
+    if rel_dict is not None:
+        rel += dict2props(rel_dict)
     cypher_query = "MATCH ({})-[{}:{}]->({}) RETURN {}, {}, {}".format(
         symbols[0],
         symbols[1],
@@ -27,15 +29,24 @@ def merge_rel(kg, src, rel, dst, rel_dict=None):
     symbols = ['a', 'b', 'c']
     if type(src['val']) is str:
         src['val'] = "'{}'".format(src['val'])
-    init_node = ("MERGE(%s{%s: %s}) RETURN %s" % (symbols[0], src['key'], src['val'], symbols[0]))
+    if 'type' in src:
+        src_sym = '{}:{}'.format(symbols[0], src['type'])
+    else:
+        src_sym = symbols[0]
+    init_node = ("MERGE(%s{%s: %s}) RETURN %s" % (src_sym, src['key'], src['val'], symbols[0]))
     _ = kg.run(init_node).data()
     if type(dst['val']) is str:
         dst['val'] = "'{}'".format(dst['val'])
-    init_node = ("MERGE(%s{%s: %s}) RETURN %s" % (symbols[2], dst['key'], dst['val'], symbols[2]))
+    if 'type' in dst:
+        dst_sym = '{}:{}'.format(symbols[2], dst['type'])
+    else:
+        dst_sym = symbols[2]
+    init_node = ("MERGE(%s{%s: %s}) RETURN %s" % (dst_sym, dst['key'], dst['val'], symbols[2]))
     _ = kg.run(init_node).data()
     if rel_dict is not None:
         rel += dict2props(rel_dict)
-    cypher_query = "MATCH ({0}),({2}) WHERE {0}.{3}={4} AND {2}.{5}={6} MERGE ({0})-[{1}:{7}]->({2}) RETURN {0},{1},{2}".format(
+    cypher_query = "MATCH ({0}), ({2}) WHERE {0}.{3}={4} AND {2}.{5}={6} MERGE ({0})-[{1}:{7}]->({2}) RETURN {0}, " \
+                   "{1}, {2}".format(
         symbols[0],
         symbols[1],
         symbols[2],
@@ -49,13 +60,28 @@ def merge_rel(kg, src, rel, dst, rel_dict=None):
     return results, symbols
 
 
-def delete_rel(kg, src, rel, dst):
+def delete_rel(kg, src, rel, dst, rel_dict=None):
     symbols = ['a', 'b', 'c']
-    init_node = ("MERGE(%s{%s: '%s'}) RETURN %s" % (symbols[0], src['key'], src['val'], symbols[0]))
+    if type(src['val']) is str:
+        src['val'] = "'{}'".format(src['val'])
+    if 'type' in src:
+        src_sym = '{}:{}'.format(symbols[0], src['type'])
+    else:
+        src_sym = symbols[0]
+    init_node = ("MERGE(%s{%s: '%s'}) RETURN %s" % (src_sym, src['key'], src['val'], symbols[0]))
     _ = kg.run(init_node).data()
-    init_node = ("MERGE(%s{%s: '%s'}) RETURN %s" % (symbols[2], dst['key'], dst['val'], symbols[2]))
+    if type(dst['val']) is str:
+        dst['val'] = "'{}'".format(dst['val'])
+    if 'type' in dst:
+        dst_sym = '{}:{}'.format(symbols[2], dst['type'])
+    else:
+        dst_sym = symbols[2]
+    init_node = ("MERGE(%s{%s: '%s'}) RETURN %s" % (dst_sym, dst['key'], dst['val'], symbols[2]))
     _ = kg.run(init_node).data()
-    cypher_query = "MATCH ({0})-[{1}]->({2}) WHERE {0}.{3}='{4}' AND {2}.{5}='{6}' AND TYPE({1})='{7}' DELETE {1} RETURN {0},{2}".format(
+    if rel_dict is not None:
+        rel += dict2props(rel_dict)
+    cypher_query = "MATCH ({0})-[{1}]->({2}) WHERE {0}.{3}='{4}' AND {2}.{5}='{6}' AND TYPE({1})='{7}' DELETE {1} " \
+                   "RETURN {0},{2}".format(
         symbols[0],
         symbols[1],
         symbols[2],
