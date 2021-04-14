@@ -1,4 +1,6 @@
 # Chimaera
+写这玩意纯粹是为了反驳某些民科认为只要写了代码就创造了一个AGI
+
 KG+NLP+LISP+Prolog+ANN+Hook=Junk
 
 ![image](https://github.com/AlucardNosferatu/Chimaera/raw/main/README.jpg)
